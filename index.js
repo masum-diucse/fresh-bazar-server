@@ -15,6 +15,7 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 client.connect(err => {
     const productCollection = client.db(`${process.env.DB_NAME}`).collection(`${process.env.DB_COLLECTION}`);
     
+    //--add single product
     app.post('/addProduct',(req,res)=>{
         const newProduct=req.body;
         productCollection.insertOne(newProduct)
@@ -22,6 +23,24 @@ client.connect(err => {
           console.log(result.insertedCount)
           res.send(result.insertedCount>0)
         })
+      })
+
+      //--get all products
+      app.get('/getAllProduct',(req,res)=>{
+        productCollection.find({})
+        .toArray((err,products)=>{
+            res.send(products);
+        })
+      })
+
+      //--delete single product
+      app.delete('/deleteProduct/:id',(req,res)=>{
+        const id=req.params.id;
+        productCollection.deleteOne({
+          _id:ObjectId(id)
+        }).then(result=>{
+          res.send(result.deletedCount>0);
+      })
       })
     
     console.log("DB Connected");
