@@ -13,7 +13,8 @@ const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
 
 client.connect(err => {
-    const productCollection = client.db(`${process.env.DB_NAME}`).collection(`${process.env.DB_COLLECTION}`);
+    const productCollection = client.db(`${process.env.DB_NAME}`).collection(`${process.env.DB_COLLECTION_1}`);
+    const ordersCollection = client.db(`${process.env.DB_NAME}`).collection(`${process.env.DB_COLLECTION_2}`);
     
     //--add single product
     app.post('/addProduct',(req,res)=>{
@@ -24,6 +25,14 @@ client.connect(err => {
           res.send(result.insertedCount>0)
         })
       })
+    //--add order
+      app.post('/addOrder',(req,res)=>{
+        const order=req.body;
+        ordersCollection.insertOne(order)
+        .then(result=>{
+            res.send(result.insertedCount>0)
+        })
+    })
 
       //--get all products
       app.get('/getAllProduct',(req,res)=>{
@@ -32,6 +41,15 @@ client.connect(err => {
             res.send(products);
         })
       })
+
+      //--get single product
+      app.get('/getSingleProduct/:id',(req,res)=>{
+        productCollection.find({_id:ObjectId(req.params.id)})
+        .toArray((err,documents)=>{
+            res.send(documents)
+        })
+      })
+
 
       //--delete single product
       app.delete('/deleteProduct/:id',(req,res)=>{
